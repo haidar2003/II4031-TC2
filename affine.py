@@ -1,12 +1,4 @@
 import random
-
-lowerCase = 'abcdefghijklmnopqrstuvwxyz'
-upperCase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-
-def getOrder(alphabet):
-    for i in range(len(lowerCase)):
-        if alphabet.lower() == lowerCase[i]:
-            return i
         
 def isCoPrime(num1, num2):
     smallest = min(num1, num2)
