@@ -1,3 +1,4 @@
+import base64
 import random
         
 def isCoPrime(num1, num2):
@@ -55,6 +56,43 @@ def rc4_file(input_file, output_file, key):
         fout.write(c.encode('latin1'))
         p = fin.read(1)
 
+def rc4_bytes_encrypt(input_bytes, key):
+    m = keyGen(key)
+    b = keyGen(m)
+
+    while not(isCoPrime(m, 26)):
+        m += 1
+
+    S = [0 for i in range(256)]
+    for i in range(256):
+        S[i] = i
+        
+    j = 0
+    for i in range(256):
+        p = (j + S[i] + ord(key[i % len(key)])) % 256 
+        j = ((m * p) + b ) % 256
+        S[i], S[j] = S[j], S[i]
+
+    i = j = count = 0
+    output_bytes = b''
+
+    plainText = list(input_bytes)
+    plainTextLength = len(plainText)
+
+    while count < plainTextLength: 
+        p = input_bytes[count]
+        i = (i + 1) % 256
+        j = (j + S[i]) % 256
+        S[i], S[j] = int.from_bytes(vignere_extended_encrypt(S[j].to_bytes(1, 'big'), key)), int.from_bytes(vignere_extended_encrypt(S[i].to_bytes(1, 'big'), key))
+        t = (S[i] + S[j]) % 256
+        t = int.from_bytes(vignere_extended_encrypt(t.to_bytes(1, 'big'), key))
+        u = S[t]  
+        u = int.from_bytes(vignere_extended_encrypt(u.to_bytes(1, 'big'), key))
+        c = chr(p ^ u)  
+        output_bytes += (c.encode('latin1'))
+        count += 1
+    
+    return bytes(output_bytes)
 
 def rc4_text_encrypt(input_text, key):
     m = keyGen(key)
@@ -91,6 +129,12 @@ def rc4_text_encrypt(input_text, key):
 
     return output_text.decode('latin1')
 
+def binary_to_base64(binary:bytes):
+    return(base64.b64encode(binary))
+
+def string_to_base64(string:str):
+    return(base64.b64encode(string.encode("latin1")))
+
 
 if __name__ == "__main__":
     input_file = 'test.txt'
@@ -99,6 +143,7 @@ if __name__ == "__main__":
     key = 'ASDASDASDASDASDASD'
     # rc4_file(input_file, output_file, key)
     # rc4_file(output_file, output_file_2, key)
-    ciphertext = rc4_text_encrypt('H', 'ASDFG')
-    print(ciphertext)
-    print(rc4_text_encrypt(ciphertext, 'ASDFG'))
+    ciphertext = rc4_bytes_encrypt(b'H', 'ASDFG')
+    print(binary_to_base64(ciphertext))
+    # print(rc4_bytes_encrypt(ciphertext, 'ASDFG'))
+    print(rc4_bytes_encrypt(ciphertext, 'ASDFG'))
