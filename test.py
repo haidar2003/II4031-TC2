@@ -11,6 +11,15 @@ def keyGen(seed):
     random.seed(seed)
     return random.randint(1, 1000000) 
 
+def vignere_extended_encrypt(plainBytes:bytes, key:str):
+    keyLength = len(key)
+    plainText = list(plainBytes)
+    plainTextLength = len(plainText)
+    result = [0 for i in range(plainTextLength)]
+    for i in range(plainTextLength):
+        result[i] = (((plainText[i]) + ord(key[i % keyLength])) % 256)
+    return bytes(result)
+
 def rc4_file(input_file, output_file, key):
     m = keyGen(key)
     b = keyGen(m)
@@ -37,9 +46,11 @@ def rc4_file(input_file, output_file, key):
     while p: 
         i = (i + 1) % 256
         j = (j + S[i]) % 256
-        S[i], S[j] = S[j], S[i] 
+        S[i], S[j] = int.from_bytes(vignere_extended_encrypt(S[j].to_bytes(1, 'big'), key)), int.from_bytes(vignere_extended_encrypt(S[i].to_bytes(1, 'big'), key))
         t = (S[i] + S[j]) % 256
+        t = int.from_bytes(vignere_extended_encrypt(t.to_bytes(1, 'big'), key))
         u = S[t]  
+        u = int.from_bytes(vignere_extended_encrypt(u.to_bytes(1, 'big'), key))
         c = chr(ord(p) ^ u)  
         fout.write(c.encode('latin1'))
         p = fin.read(1)
@@ -70,9 +81,11 @@ def rc4_text_encrypt(input_text, key):
         p = input_text[count]
         i = (i + 1) % 256
         j = (j + S[i]) % 256
-        S[i], S[j] = S[j], S[i] 
+        S[i], S[j] = int.from_bytes(vignere_extended_encrypt(S[j].to_bytes(1, 'big'), key)), int.from_bytes(vignere_extended_encrypt(S[i].to_bytes(1, 'big'), key))
         t = (S[i] + S[j]) % 256
+        t = int.from_bytes(vignere_extended_encrypt(t.to_bytes(1, 'big'), key))
         u = S[t]  
+        u = int.from_bytes(vignere_extended_encrypt(u.to_bytes(1, 'big'), key))
         c = chr(ord(p) ^ u)  
         output_text += (c.encode('latin1'))
 
@@ -84,8 +97,8 @@ if __name__ == "__main__":
     output_file = 'output.txt'
     output_file_2 = 'output1.txt'
     key = 'ASDASDASDASDASDASD'
-    rc4_file(input_file, output_file, key)
-    rc4_file(output_file, output_file_2, key)
-    ciphertext = rc4_text_encrypt('Haidar Rubah', 'ASDFG')
+    # rc4_file(input_file, output_file, key)
+    # rc4_file(output_file, output_file_2, key)
+    ciphertext = rc4_text_encrypt('H', 'ASDFG')
     print(ciphertext)
     print(rc4_text_encrypt(ciphertext, 'ASDFG'))
