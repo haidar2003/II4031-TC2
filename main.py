@@ -198,7 +198,11 @@ def main():
             outputFile = filedialog.asksaveasfile(mode="wb",filetypes=[("All files","*.*")])
         else :
             outputFile = filedialog.asksaveasfile(mode="wb",defaultextension=".txt",filetypes=[("Text files","*.txt*")])
-        outputFile.write(resultContent.encode('latin1'))
+
+        if type(resultContent) == str:
+            outputFile.write(resultContent.encode('latin1'))
+        else:
+            outputFile.write(resultContent)
         
     # Input Text
     inputText = tk.StringVar()
